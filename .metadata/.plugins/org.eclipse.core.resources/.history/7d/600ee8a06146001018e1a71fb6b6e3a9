@@ -1,0 +1,120 @@
+// ========== Panel Toggling for Sign Up/Sign In ==========
+const signUpButton = document.getElementById('signUp');
+const signInButton = document.getElementById('signIn');
+const container = document.getElementById('container');
+
+// Handle Sign Up button click
+signUpButton?.addEventListener('click', () => {
+  container.classList.add("right-panel-active");
+});
+
+// Handle Sign In button click
+signInButton?.addEventListener('click', () => {
+  container.classList.remove("right-panel-active");
+});
+
+// ========== Forgot Password Functionality ==========
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+const forgotPasswordModal = document.getElementById("forgotPasswordModal");
+const closeModal = document.querySelector(".close");
+const sendOtpBtn = document.getElementById("sendOtp");
+const verifyOtpBtn = document.getElementById("verifyOtp");
+const otpSection = document.getElementById("otpSection");
+const emailInput = document.getElementById("forgotEmail");
+const otpInput = document.getElementById("otpInput");
+let generatedOtp = null;
+
+// Open Forgot Password Modal
+forgotPasswordBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  forgotPasswordModal.style.display = "block";
+});
+
+// Close Modal and Reset Fields
+closeModal?.addEventListener("click", () => {
+  forgotPasswordModal.style.display = "none";
+  otpSection.style.display = "none";
+  emailInput.value = "";
+  otpInput.value = "";
+});
+
+// Generate and Send OTP
+sendOtpBtn?.addEventListener("click", () => {
+  const email = emailInput.value;
+  if (!email) {
+    alert("Please enter a valid email!");
+    return;
+  }
+  generatedOtp = Math.floor(100000 + Math.random() * 900000); // Generate 6-digit OTP
+  console.log("Generated OTP:", generatedOtp); // Log for debugging
+  alert(`OTP sent to ${email}`);
+  otpSection.style.display = "block";
+});
+
+// Verify OTP
+verifyOtpBtn?.addEventListener("click", () => {
+  const enteredOtp = otpInput.value;
+  if (enteredOtp == generatedOtp) {
+    alert("OTP Verified! You can now reset your password.");
+    forgotPasswordModal.style.display = "none";
+  } else {
+    alert("Invalid OTP. Try again.");
+  }
+});
+
+// ========== Officer Sign In Form Submission ==========
+const form = document.getElementById("iamofficer");
+
+form?.addEventListener("submit", function (e) {
+  e.preventDefault(); // Prevent default form submission
+
+  // Collect form data
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const id = document.getElementById("officerId").value.trim();
+
+  // Validate fields
+  if (!email || !password || !id) {
+    alert("Please fill in all the fields.");
+    return;
+  }
+
+  // Prepare JSON payload
+  const officerData = {
+    email: email,
+    password: password,
+    id: Number(id) // Ensure 'id' is sent as a number
+  };
+
+  console.log("Officer Login Payload:", officerData);
+
+  // POST request to backend
+  fetch("http://localhost:8080/user/iamofficer", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(officerData)
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Server Response:", data);
+
+      if (data.status === 200) {
+        alert(data.message || "Login successful!");
+        window.location.href = "Officer_dashboard.html";
+      } else {
+        alert(data.message || "Login failed.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error during login:", error);
+      alert("An error occurred. Please try again later.");
+    });
+});
+\\\
